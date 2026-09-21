@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { UploadCloud, ShieldCheck, FileImage, Lock, User, FolderHeart, ListPlus } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 
@@ -11,8 +11,11 @@ function Admin() {
   const [isCompressing, setIsCompressing] = useState(false);
   const [category, setCategory] = useState('Random (Too cute to categorize)');
   const [logs, setLogs] = useState([]);
-  // Use direct cPanel URL because mutanttechnologies.com points to Vercel!
-  const API_URL = 'https://s670.bom1.mysecurecloudhost.com/~mutantte/api/vyanshworldapi.php';
+  const [compressedImage, setCompressedImage] = useState(null); 
+
+  const fileInputRef = useRef(null);
+
+  const API_URL = 'https://s670.bom1.mysecurecloudhost.com/~mutantte/api/vyanshworldapi.php'; 
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -24,10 +27,12 @@ function Admin() {
     }
   };
 
-  const addLog = (msg) => setLogs(prev => [...prev, msg]);
+  const addLog = (msg) => {
+    setLogs(prev => [...prev, String(msg)]);
+  };
 
   const handleFileUpload = async (event) => {
-    const files = Array.from(event.target.files);
+    const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
 
     setIsCompressing(true);
@@ -43,12 +48,13 @@ function Admin() {
             const options = {
                 maxSizeMB: 0.5,
                 maxWidthOrHeight: 1920,
-                useWebWorker: true,
+                // Turning off web worker. Vercel/Vite production builds sometimes break web workers causing a crash!
+                useWebWorker: false, 
             };
 
             const compressedFile = await imageCompression(file, options);
             const compressedSizeMB = (compressedFile.size / 1024 / 1024).toFixed(2);
-            setCompressedImage(URL.createObjectURL(compressedFile)); // Preview the latest one
+            setCompressedImage(URL.createObjectURL(compressedFile)); 
 
             const formData = new FormData();
             formData.append('image', compressedFile, file.name);
@@ -71,18 +77,21 @@ function Admin() {
                 }
             } catch (jsonError) {
                 addLog(`❌ [${i+1}/${files.length}] Server returned non-JSON!`);
-                console.error(textResponse);
+                console.error("Server Response:", textResponse);
             }
 
         } catch (error) {
             console.error('Error compressing/uploading image:', error);
-            addLog(`❌ [${i+1}/${files.length}] Failed: ${error.message}`);
+            addLog(`❌ [${i+1}/${files.length}] Failed: ${error?.message || 'Unknown error'}`);
         }
     }
     
     addLog(`🎉 All done! Processed ${files.length} file(s).`);
     setIsCompressing(false);
-    event.target.value = ''; // Reset the input so you can upload the same files again if needed
+    
+    if (fileInputRef.current) {
+        fileInputRef.current.value = ''; 
+    }
   };
 
   if (!isAuthenticated) {
@@ -182,6 +191,7 @@ function Admin() {
                   type="file" 
                   accept="image/*" 
                   multiple
+                  ref={fileInputRef}
                   className="hidden" 
                   onChange={handleFileUpload} 
                   disabled={isCompressing} 
@@ -195,11 +205,16 @@ function Admin() {
               <div className="flex-1">
                 <h3 className="font-bold text-slate-700 mb-3">Robot Assistant Log</h3>
                 <ul className="text-sm font-mono text-slate-600 space-y-2 h-64 overflow-y-auto p-4 bg-white rounded border border-slate-200">
-                  {logs.map((log, i) => (
-                    <li key={i} className={log.includes('✅') || log.includes('Success') || log.includes('🎉') ? 'text-emerald-600 font-bold' : log.includes('❌') ? 'text-red-600 font-bold' : ''}>
-                      &gt; {log}
-                    </li>
-                  ))}
+                  {logs.map((log, i) => {
+                    const strLog = String(log);
+                    const isSuccess = strLog.includes('✅') || strLog.includes('Success') || strLog.includes('🎉');
+                    const isError = strLog.includes('❌');
+                    return (
+                      <li key={i} className={isSuccess ? 'text-emerald-600 font-bold' : isError ? 'text-red-600 font-bold' : ''}>
+                        &gt; {strLog}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
 
