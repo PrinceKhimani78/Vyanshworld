@@ -15,7 +15,8 @@ function Admin() {
 
   const fileInputRef = useRef(null);
 
-  const API_URL = 'https://s670.bom1.mysecurecloudhost.com/~mutantte/api/vyanshworldapi.php'; 
+  // Using api.rojgariindia.com because your main domain points to Vercel and cPanel direct IP is blocked!
+  const API_URL = 'https://api.rojgariindia.com/api/vyanshworldapi.php'; 
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -48,7 +49,6 @@ function Admin() {
             const options = {
                 maxSizeMB: 0.5,
                 maxWidthOrHeight: 1920,
-                // Turning off web worker. Vercel/Vite production builds sometimes break web workers causing a crash!
                 useWebWorker: false, 
             };
 
