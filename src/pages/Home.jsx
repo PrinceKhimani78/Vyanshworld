@@ -36,7 +36,7 @@ function Home() {
 
   // Fetch photos from the database!
   useEffect(() => {
-    fetch('https://api.rojgariindia.com/api/vyanshworldapi.php')
+    fetch('https://vyansh-api.mutanttechnologies.com/vyanshworldapi.php')
       .then(res => res.json())
       .then(data => {
         // Map data from database to our app structure
@@ -44,7 +44,7 @@ function Home() {
           id: item.id,
           category: item.category,
           type: 'image', // Assuming all uploads are images right now
-          url: `https://api.rojgariindia.com/api/uploads/${item.filename}`,
+          url: `https://vyansh-api.mutanttechnologies.com/uploads/${item.filename}`,
           color: getRandomColor(),
           height: getRandomHeight(),
           title: "Cute moment" 

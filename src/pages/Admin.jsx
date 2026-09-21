@@ -15,8 +15,8 @@ function Admin() {
 
   const fileInputRef = useRef(null);
 
-  // Using api.rojgariindia.com because your main domain points to Vercel and cPanel direct IP is blocked!
-  const API_URL = 'https://api.rojgariindia.com/api/vyanshworldapi.php'; 
+  // Using the new dedicated subdomain for Vyansh!
+  const API_URL = 'https://vyansh-api.mutanttechnologies.com/vyanshworldapi.php'; 
 
   const handleLogin = (e) => {
     e.preventDefault();
